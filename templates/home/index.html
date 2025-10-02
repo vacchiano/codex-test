@@ -328,6 +328,11 @@
         cursor: pointer;
       }
 
+      .option-chip button:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
       .slot-form {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -547,6 +552,7 @@
     </style>
   </head>
   <body>
+    <div id="app">
     <header>
       <nav>
         <a href="#" class="logo">
@@ -667,38 +673,54 @@
           </div>
           <div>
             <label for="eventTitle">Event name</label>
-            <input id="eventTitle" type="text" value="Family Brunch" />
+            <input id="eventTitle" type="text" v-model="eventTitle" />
           </div>
           <div>
             <label>Time options</label>
-            <div id="optionList" class="option-list"></div>
+            <div class="option-list">
+              <div
+                v-for="option in options"
+                :key="option.id"
+                class="option-chip"
+              >
+                <span>{{ option.label }}</span>
+                <button
+                  type="button"
+                  aria-label="Remove option"
+                  @click="removeOption(option.id)"
+                  :disabled="options.length === 1"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
           </div>
           <div class="slot-form">
             <div>
               <label for="dateInput">Date</label>
-              <input id="dateInput" type="date" />
+              <input id="dateInput" type="date" v-model="newOption.date" />
             </div>
             <div class="time-inputs">
               <div>
                 <label for="startTimeInput">Start</label>
-                <input id="startTimeInput" type="time" />
+                <input id="startTimeInput" type="time" v-model="newOption.start" />
               </div>
               <div>
                 <label for="endTimeInput">End</label>
-                <input id="endTimeInput" type="time" />
+                <input id="endTimeInput" type="time" v-model="newOption.end" />
               </div>
             </div>
           </div>
           <div style="display: flex; gap: 12px; flex-wrap: wrap">
-            <button id="addSlot" class="btn btn-tertiary" type="button">Add option</button>
+            <button class="btn btn-tertiary" type="button" @click="addOption">Add option</button>
             <button class="btn btn-secondary" type="button">Use smart suggestions</button>
           </div>
           <div class="share-link">
             <div>
               <span>Share invite link</span>
-              <div id="shareUrl" class="share-url"></div>
+              <div class="share-url">{{ shareUrl }}</div>
             </div>
-            <button id="copyLink" class="btn btn-primary" type="button">Copy Link</button>
+            <button class="btn btn-primary" type="button" @click="copyShareLink">{{ copyLabel }}</button>
           </div>
         </div>
 
@@ -712,14 +734,41 @@
           <div class="voting-grid">
             <table>
               <thead>
-                <tr id="gridHeader"></tr>
+                <tr>
+                  <th>Participants</th>
+                  <th v-for="option in options" :key="option.id">{{ option.label }}</th>
+                </tr>
               </thead>
-              <tbody id="gridBody"></tbody>
+              <tbody>
+                <tr v-for="participant in participants" :key="participant">
+                  <td>{{ participant }}</td>
+                  <td v-for="option in options" :key="option.id">
+                    <button
+                      type="button"
+                      class="availability-cell"
+                      :class="votes[participant][option.id] ? 'available' : 'unavailable'"
+                      @click="toggleAvailability(participant, option.id)"
+                    >
+                      {{ votes[participant][option.id] ? 'Yes' : 'No' }}
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
             </table>
           </div>
           <div>
             <h3 style="margin: 0 0 12px">Top matches</h3>
-            <div id="results" class="results-list"></div>
+            <div class="results-list">
+              <div v-for="result in resultsSummary" :key="result.id" class="result-item">
+                <div class="result-header">
+                  <span>{{ result.label }}</span>
+                  <span>{{ result.availableCount }}/{{ result.totalParticipants }} available</span>
+                </div>
+                <div class="result-bar">
+                  <div class="result-bar-fill" :style="{ width: `${result.percentage}%` }"></div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -745,196 +794,137 @@
     <footer>
       EventSync &mdash; coordinating time together made simple.
     </footer>
+    </div>
 
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <script>
-      const state = {
-        options: [
-          { id: crypto.randomUUID(), label: "Tue, May 21 · 10:00 AM - 11:30 AM" },
-          { id: crypto.randomUUID(), label: "Tue, May 21 · 7:00 PM - 8:30 PM" },
-          { id: crypto.randomUUID(), label: "Wed, May 22 · 11:00 AM - 12:00 PM" }
-        ],
-        participants: ["Alex", "Jordyn", "Mason", "Luca", "Priya"],
-        votes: {}
-      };
+      const defaultParticipants = ["Alex", "Jordyn", "Mason", "Luca", "Priya"];
 
-      state.participants.forEach((participant, index) => {
-        state.votes[participant] = {};
-        state.options.forEach((option, optionIndex) => {
-          const prefill = optionIndex === 0 || (participant === "Alex" && optionIndex !== 1);
-          state.votes[participant][option.id] = prefill;
-        });
-      });
-
-      const optionList = document.getElementById("optionList");
-      const gridHeader = document.getElementById("gridHeader");
-      const gridBody = document.getElementById("gridBody");
-      const results = document.getElementById("results");
-      const eventTitleInput = document.getElementById("eventTitle");
-      const shareUrl = document.getElementById("shareUrl");
-      const addSlotButton = document.getElementById("addSlot");
-      const copyLinkButton = document.getElementById("copyLink");
-
-      function formatDateOption(dateValue, startValue, endValue) {
-        if (!dateValue || !startValue || !endValue) return null;
-        const date = new Date(dateValue + "T00:00:00");
-        const dateFormatter = new Intl.DateTimeFormat("en-US", {
-          weekday: "short",
-          month: "short",
-          day: "numeric"
-        });
-        const timeFormatter = new Intl.DateTimeFormat("en-US", {
-          hour: "numeric",
-          minute: "2-digit"
-        });
-        const startDate = new Date(`${dateValue}T${startValue}`);
-        const endDate = new Date(`${dateValue}T${endValue}`);
-        return `${dateFormatter.format(date)} · ${timeFormatter.format(startDate)} - ${timeFormatter.format(endDate)}`;
+      function createInitialOptions() {
+        return [
+          "Tue, May 21 · 10:00 AM - 11:30 AM",
+          "Tue, May 21 · 7:00 PM - 8:30 PM",
+          "Wed, May 22 · 11:00 AM - 12:00 PM"
+        ].map((label) => ({ id: crypto.randomUUID(), label }));
       }
 
-      function renderOptions() {
-        optionList.innerHTML = "";
-        state.options.forEach((option) => {
-          const chip = document.createElement("div");
-          chip.className = "option-chip";
-          chip.innerHTML = `${option.label} <button type="button" aria-label="Remove option">×</button>`;
-          chip.querySelector("button").addEventListener("click", () => removeOption(option.id));
-          optionList.appendChild(chip);
-        });
-        renderGrid();
-        renderResults();
-        updateShareLink();
-      }
-
-      function renderGrid() {
-        gridHeader.innerHTML = "";
-        const nameHeader = document.createElement("th");
-        nameHeader.textContent = "Participants";
-        gridHeader.appendChild(nameHeader);
-
-        state.options.forEach((option) => {
-          const th = document.createElement("th");
-          th.textContent = option.label;
-          gridHeader.appendChild(th);
-        });
-
-        gridBody.innerHTML = "";
-        state.participants.forEach((participant) => {
-          const row = document.createElement("tr");
-          const nameCell = document.createElement("td");
-          nameCell.textContent = participant;
-          row.appendChild(nameCell);
-
-          state.options.forEach((option) => {
-            const cell = document.createElement("td");
-            const button = document.createElement("div");
-            button.className = "availability-cell";
-            button.dataset.participant = participant;
-            button.dataset.optionId = option.id;
-            button.textContent = state.votes[participant][option.id] ? "Yes" : "No";
-            button.classList.add(state.votes[participant][option.id] ? "available" : "unavailable");
-            button.addEventListener("click", toggleAvailability);
-            cell.appendChild(button);
-            row.appendChild(cell);
+      function createInitialVotes(options, participants) {
+        const votes = {};
+        participants.forEach((participant) => {
+          votes[participant] = {};
+          options.forEach((option, optionIndex) => {
+            const prefill = optionIndex === 0 || (participant === "Alex" && optionIndex !== 1);
+            votes[participant][option.id] = prefill;
           });
-          gridBody.appendChild(row);
         });
+        return votes;
       }
 
-      function renderResults() {
-        results.innerHTML = "";
-        const totalParticipants = state.participants.length;
-        state.options.forEach((option) => {
-          let availableCount = 0;
-          state.participants.forEach((participant) => {
-            if (state.votes[participant][option.id]) availableCount += 1;
-          });
-          const item = document.createElement("div");
-          item.className = "result-item";
+      const { createApp } = Vue;
 
-          const header = document.createElement("div");
-          header.className = "result-header";
-          header.innerHTML = `<span>${option.label}</span><span>${availableCount}/${totalParticipants} available</span>`;
-
-          const bar = document.createElement("div");
-          bar.className = "result-bar";
-          const barFill = document.createElement("div");
-          barFill.className = "result-bar-fill";
-          barFill.style.width = `${(availableCount / totalParticipants) * 100}%`;
-          bar.appendChild(barFill);
-
-          item.appendChild(header);
-          item.appendChild(bar);
-          results.appendChild(item);
-        });
-      }
-
-      function toggleAvailability(event) {
-        const { participant, optionId } = event.currentTarget.dataset;
-        const current = state.votes[participant][optionId];
-        state.votes[participant][optionId] = !current;
-        renderGrid();
-        renderResults();
-      }
-
-      function removeOption(optionId) {
-        if (state.options.length === 1) return;
-        state.options = state.options.filter((option) => option.id !== optionId);
-        state.participants.forEach((participant) => {
-          delete state.votes[participant][optionId];
-        });
-        renderOptions();
-      }
-
-      addSlotButton.addEventListener("click", () => {
-        const dateValue = document.getElementById("dateInput").value;
-        const startValue = document.getElementById("startTimeInput").value;
-        const endValue = document.getElementById("endTimeInput").value;
-        const label = formatDateOption(dateValue, startValue, endValue);
-        if (!label) {
-          alert("Please choose a date, start time, and end time.");
-          return;
+      createApp({
+        data() {
+          const options = createInitialOptions();
+          return {
+            eventTitle: "Family Brunch",
+            participants: [...defaultParticipants],
+            options,
+            votes: createInitialVotes(options, defaultParticipants),
+            newOption: {
+              date: "",
+              start: "",
+              end: ""
+            },
+            copyLabel: "Copy Link"
+          };
+        },
+        computed: {
+          shareUrl() {
+            const slug = this.slugify(this.eventTitle || "event");
+            return `https://eventsync.app/p/${slug}?slots=${this.options.length}`;
+          },
+          resultsSummary() {
+            const totalParticipants = this.participants.length;
+            return this.options.map((option) => {
+              const availableCount = this.participants.reduce((count, participant) => {
+                return count + (this.votes[participant]?.[option.id] ? 1 : 0);
+              }, 0);
+              const percentage = totalParticipants
+                ? Math.round((availableCount / totalParticipants) * 100)
+                : 0;
+              return {
+                id: option.id,
+                label: option.label,
+                availableCount,
+                totalParticipants,
+                percentage
+              };
+            });
+          }
+        },
+        methods: {
+          formatDateOption(dateValue, startValue, endValue) {
+            if (!dateValue || !startValue || !endValue) return null;
+            const date = new Date(`${dateValue}T00:00:00`);
+            const dateFormatter = new Intl.DateTimeFormat("en-US", {
+              weekday: "short",
+              month: "short",
+              day: "numeric"
+            });
+            const timeFormatter = new Intl.DateTimeFormat("en-US", {
+              hour: "numeric",
+              minute: "2-digit"
+            });
+            const startDate = new Date(`${dateValue}T${startValue}`);
+            const endDate = new Date(`${dateValue}T${endValue}`);
+            return `${dateFormatter.format(date)} · ${timeFormatter.format(startDate)} - ${timeFormatter.format(endDate)}`;
+          },
+          addOption() {
+            const label = this.formatDateOption(this.newOption.date, this.newOption.start, this.newOption.end);
+            if (!label) {
+              alert("Please choose a date, start time, and end time.");
+              return;
+            }
+            const option = { id: crypto.randomUUID(), label };
+            this.options.push(option);
+            this.participants.forEach((participant) => {
+              this.votes[participant][option.id] = false;
+            });
+            this.newOption.date = "";
+            this.newOption.start = "";
+            this.newOption.end = "";
+          },
+          removeOption(optionId) {
+            if (this.options.length === 1) return;
+            this.options = this.options.filter((option) => option.id !== optionId);
+            this.participants.forEach((participant) => {
+              delete this.votes[participant][optionId];
+            });
+          },
+          toggleAvailability(participant, optionId) {
+            this.votes[participant][optionId] = !this.votes[participant][optionId];
+          },
+          slugify(value) {
+            return value
+              .toString()
+              .trim()
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, "-")
+              .replace(/(^-|-$)+/g, "");
+          },
+          async copyShareLink() {
+            try {
+              await navigator.clipboard.writeText(this.shareUrl);
+              this.copyLabel = "Copied!";
+            } catch (error) {
+              this.copyLabel = "Press ⌘C / Ctrl+C";
+            }
+            setTimeout(() => {
+              this.copyLabel = "Copy Link";
+            }, 1600);
+          }
         }
-        const option = { id: crypto.randomUUID(), label };
-        state.options.push(option);
-        state.participants.forEach((participant) => {
-          state.votes[participant][option.id] = false;
-        });
-        document.getElementById("dateInput").value = "";
-        document.getElementById("startTimeInput").value = "";
-        document.getElementById("endTimeInput").value = "";
-        renderOptions();
-      });
-
-      function updateShareLink() {
-        const slug = slugify(eventTitleInput.value || "event");
-        const optionCount = state.options.length;
-        shareUrl.textContent = `https://eventsync.app/p/${slug}?slots=${optionCount}`;
-      }
-
-      function slugify(value) {
-        return value
-          .toString()
-          .trim()
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/(^-|-$)+/g, "");
-      }
-
-      eventTitleInput.addEventListener("input", updateShareLink);
-
-      copyLinkButton.addEventListener("click", async () => {
-        const text = shareUrl.textContent;
-        try {
-          await navigator.clipboard.writeText(text);
-          copyLinkButton.textContent = "Copied!";
-          setTimeout(() => (copyLinkButton.textContent = "Copy Link"), 1600);
-        } catch (error) {
-          copyLinkButton.textContent = "Press ⌘C / Ctrl+C";
-          setTimeout(() => (copyLinkButton.textContent = "Copy Link"), 1600);
-        }
-      });
-
-      renderOptions();
+      }).mount("#app");
     </script>
   </body>
 </html>
