@@ -2,12 +2,939 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Django App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>EventSync | Find the Perfect Time Together</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    />
+    <style>
+      :root {
+        --primary: #4285f4;
+        --secondary: #34a853;
+        --background: #fafafa;
+        --text: #202124;
+        --accent: #ea4335;
+        --available: #e8f5e8;
+        --card-bg: #ffffff;
+        --border: #e0e0e0;
+        --shadow: 0 24px 60px rgba(32, 33, 36, 0.08);
+        --spacing: 16px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Google Sans", "Inter", sans-serif;
+        background: var(--background);
+        color: var(--text);
+        line-height: 1.6;
+      }
+
+      img {
+        max-width: 100%;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      header {
+        background: var(--card-bg);
+        box-shadow: 0 1px 0 rgba(32, 33, 36, 0.08);
+        position: sticky;
+        top: 0;
+        z-index: 20;
+      }
+
+      nav {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: calc(var(--spacing) * 1) var(--spacing);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--spacing);
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        font-size: 1.1rem;
+      }
+
+      .logo-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--primary), #6ea8ff);
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-weight: 700;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 20px;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        border: none;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .btn-primary {
+        background: var(--primary);
+        color: #fff;
+        box-shadow: 0 10px 20px rgba(66, 133, 244, 0.24);
+      }
+
+      .btn-secondary {
+        background: rgba(66, 133, 244, 0.12);
+        color: var(--primary);
+      }
+
+      .btn-tertiary {
+        background: rgba(52, 168, 83, 0.12);
+        color: var(--secondary);
+      }
+
+      .btn-ghost {
+        background: transparent;
+        color: var(--primary);
+        border: 1px solid rgba(66, 133, 244, 0.24);
+      }
+
+      .btn:hover {
+        transform: translateY(-1px);
+      }
+
+      .hero {
+        background: linear-gradient(180deg, rgba(66, 133, 244, 0.12), rgba(250, 250, 250, 0));
+        padding: calc(var(--spacing) * 4) var(--spacing) calc(var(--spacing) * 5);
+      }
+
+      .container {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 0 var(--spacing);
+      }
+
+      .hero-content {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: calc(var(--spacing) * 2);
+        align-items: center;
+      }
+
+      .hero h1 {
+        font-size: clamp(2.5rem, 4vw + 1rem, 3.5rem);
+        margin-bottom: calc(var(--spacing) * 1.5);
+        line-height: 1.2;
+      }
+
+      .hero p {
+        font-size: 1.1rem;
+        margin-bottom: calc(var(--spacing) * 2);
+        color: rgba(32, 33, 36, 0.82);
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(66, 133, 244, 0.12);
+        padding: 8px 14px;
+        border-radius: 999px;
+        color: var(--primary);
+        font-weight: 600;
+        margin-bottom: calc(var(--spacing) * 1.5);
+        font-size: 0.9rem;
+      }
+
+      .hero-illustration {
+        background: var(--card-bg);
+        border-radius: 28px;
+        padding: calc(var(--spacing) * 2);
+        box-shadow: var(--shadow);
+        display: grid;
+        gap: calc(var(--spacing) * 1.5);
+      }
+
+      .hero-illustration h3 {
+        margin: 0;
+        font-size: 1.2rem;
+      }
+
+      .hero-illustration .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .hero-illustration .grid div {
+        border-radius: 12px;
+        padding: 12px;
+        background: #eef2ff;
+        color: var(--primary);
+        font-weight: 600;
+        text-align: center;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: calc(var(--spacing) * 1.5);
+        margin-top: calc(var(--spacing) * 3);
+      }
+
+      .stat-card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        padding: calc(var(--spacing) * 1.5);
+        box-shadow: var(--shadow);
+      }
+
+      .stat-value {
+        font-weight: 700;
+        font-size: 1.6rem;
+      }
+
+      section {
+        padding: calc(var(--spacing) * 4) 0;
+      }
+
+      .section-header {
+        text-align: center;
+        max-width: 640px;
+        margin: 0 auto calc(var(--spacing) * 3);
+      }
+
+      .section-header h2 {
+        font-size: clamp(2rem, 3vw + 1rem, 2.6rem);
+        margin-bottom: var(--spacing);
+      }
+
+      .section-header p {
+        color: rgba(32, 33, 36, 0.74);
+        margin: 0;
+      }
+
+      .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: calc(var(--spacing) * 1.5);
+      }
+
+      .card {
+        background: var(--card-bg);
+        border-radius: 24px;
+        padding: calc(var(--spacing) * 1.75);
+        box-shadow: var(--shadow);
+      }
+
+      .card h3 {
+        margin-top: 0;
+        margin-bottom: var(--spacing);
+      }
+
+      .card p {
+        color: rgba(32, 33, 36, 0.7);
+      }
+
+      .step-number {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: rgba(66, 133, 244, 0.12);
+        color: var(--primary);
+        display: grid;
+        place-items: center;
+        font-weight: 600;
+        margin-bottom: var(--spacing);
+      }
+
+      .workflow {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: calc(var(--spacing) * 2);
+        align-items: start;
+      }
+
+      .create-event-card {
+        display: grid;
+        gap: calc(var(--spacing) * 1.25);
+      }
+
+      label {
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+
+      input[type="text"],
+      input[type="date"],
+      input[type="time"] {
+        width: 100%;
+        border-radius: 12px;
+        border: 1px solid rgba(32, 33, 36, 0.12);
+        padding: 12px;
+        font-size: 1rem;
+        font-family: inherit;
+        transition: border 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      input[type="text"]:focus,
+      input[type="date"]:focus,
+      input[type="time"]:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.18);
+      }
+
+      .option-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .option-chip {
+        padding: 10px 14px;
+        border-radius: 999px;
+        background: rgba(52, 168, 83, 0.12);
+        color: var(--secondary);
+        font-weight: 600;
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .option-chip button {
+        background: transparent;
+        border: none;
+        color: var(--accent);
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .slot-form {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--spacing);
+      }
+
+      .slot-form .time-inputs {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--spacing);
+      }
+
+      .share-link {
+        background: rgba(66, 133, 244, 0.08);
+        border-radius: 16px;
+        padding: calc(var(--spacing) * 1.2);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .share-link span {
+        font-weight: 500;
+        color: rgba(32, 33, 36, 0.8);
+      }
+
+      .share-url {
+        font-weight: 600;
+        color: var(--primary);
+      }
+
+      .voting-card {
+        display: grid;
+        gap: calc(var(--spacing) * 1.5);
+      }
+
+      .voting-grid {
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 12px;
+        min-width: 520px;
+      }
+
+      th,
+      td {
+        padding: 12px 16px;
+        text-align: left;
+      }
+
+      thead th {
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: rgba(32, 33, 36, 0.7);
+      }
+
+      tbody tr {
+        background: var(--card-bg);
+        box-shadow: 0 12px 24px rgba(32, 33, 36, 0.08);
+        border-radius: 16px;
+      }
+
+      tbody td:first-child {
+        font-weight: 600;
+      }
+
+      tbody td {
+        position: relative;
+      }
+
+      .availability-cell {
+        border-radius: 12px;
+        padding: 12px 16px;
+        text-align: center;
+        cursor: pointer;
+        transition: background 0.2s ease, transform 0.2s ease;
+        border: 1px solid rgba(32, 33, 36, 0.12);
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+
+      .availability-cell:hover {
+        transform: translateY(-1px);
+      }
+
+      .availability-cell.available {
+        background: var(--available);
+        color: var(--secondary);
+        border-color: rgba(52, 168, 83, 0.3);
+      }
+
+      .availability-cell.unavailable {
+        background: rgba(234, 67, 53, 0.08);
+        color: var(--accent);
+        border-color: rgba(234, 67, 53, 0.16);
+      }
+
+      .availability-cell.pending {
+        background: rgba(66, 133, 244, 0.08);
+        color: var(--primary);
+        border-color: rgba(66, 133, 244, 0.16);
+      }
+
+      .results-list {
+        display: grid;
+        gap: 12px;
+      }
+
+      .result-item {
+        display: grid;
+        gap: 8px;
+      }
+
+      .result-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 600;
+      }
+
+      .result-bar {
+        height: 10px;
+        background: rgba(32, 33, 36, 0.08);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+
+      .result-bar-fill {
+        height: 100%;
+        background: var(--secondary);
+        border-radius: 999px;
+        width: 0;
+        transition: width 0.3s ease;
+      }
+
+      .cta-banner {
+        background: linear-gradient(135deg, rgba(66, 133, 244, 0.92), rgba(52, 168, 83, 0.92));
+        color: #fff;
+        border-radius: 32px;
+        padding: calc(var(--spacing) * 3);
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: calc(var(--spacing) * 2);
+        align-items: center;
+      }
+
+      .cta-banner h3 {
+        margin: 0 0 var(--spacing);
+        font-size: 2rem;
+      }
+
+      footer {
+        padding: calc(var(--spacing) * 3) var(--spacing);
+        text-align: center;
+        color: rgba(32, 33, 36, 0.6);
+      }
+
+      .participants {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .avatar {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(66, 133, 244, 0.08);
+        padding: 10px 14px;
+        border-radius: 999px;
+      }
+
+      .avatar span {
+        display: grid;
+        place-items: center;
+        width: 32px;
+        height: 32px;
+        background: var(--primary);
+        color: #fff;
+        border-radius: 50%;
+        font-weight: 600;
+      }
+
+      @media (max-width: 720px) {
+        nav {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .slot-form {
+          grid-template-columns: 1fr;
+        }
+
+        .slot-form .time-inputs {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        table {
+          min-width: 100%;
+        }
+      }
+
+      @media (max-width: 520px) {
+        .slot-form .time-inputs {
+          grid-template-columns: 1fr;
+        }
+
+        .hero-illustration .grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+    </style>
   </head>
   <body>
-    <main>
-      <h1>It works!</h1>
-      <p>Your Django project is configured and ready to run.</p>
-    </main>
+    <header>
+      <nav>
+        <a href="#" class="logo">
+          <span class="logo-icon">ES</span>
+          EventSync
+        </a>
+        <div>
+          <button class="btn btn-ghost">See How It Works</button>
+          <button class="btn btn-primary">Create Event</button>
+        </div>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div class="container hero-content">
+        <div>
+          <div class="badge">Find the perfect time, together</div>
+          <h1>Coordinating everyone&apos;s schedule is finally effortless.</h1>
+          <p>
+            Create a poll with multiple date and time options, invite family and friends,
+            and let EventSync show you the best slot that works for everyone.
+          </p>
+          <div style="display: flex; gap: 12px; flex-wrap: wrap">
+            <button class="btn btn-primary">Create Your First Event</button>
+            <button class="btn btn-secondary">See It In Action</button>
+          </div>
+          <div class="stats">
+            <div class="stat-card">
+              <div class="stat-value">50k+</div>
+              <div>Events coordinated without endless group chats.</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">1M+</div>
+              <div>Votes cast to find the perfect time together.</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">4.9★</div>
+              <div>Rated for easy scheduling by families and teams.</div>
+            </div>
+          </div>
+        </div>
+        <div class="hero-illustration">
+          <h3>Availability snapshot</h3>
+          <div class="participants">
+            <div class="avatar"><span>AL</span>Alex</div>
+            <div class="avatar"><span>JT</span>Jordyn</div>
+            <div class="avatar"><span>MS</span>Mason</div>
+            <div class="avatar"><span>LC</span>Luca</div>
+          </div>
+          <div class="grid">
+            <div>Tue 10 AM</div>
+            <div>Tue 7 PM</div>
+            <div>Wed 11 AM</div>
+            <div>Thu 6 PM</div>
+            <div class="card" style="padding: 12px; background: var(--available); color: var(--secondary);">
+              Best Fit
+            </div>
+            <div style="background: rgba(234, 67, 53, 0.08); color: var(--accent); border-radius: 12px; padding: 12px; font-weight: 600;">
+              Busy
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <div class="section-header">
+          <h2>Everything you need to plan together</h2>
+          <p>
+            EventSync combines intuitive creation tools, easy sharing, and a clear voting dashboard inspired by the best features from
+            Doodle and When2meet.
+          </p>
+        </div>
+        <div class="cards-grid">
+          <div class="card">
+            <div class="step-number">1</div>
+            <h3>Create flexible events</h3>
+            <p>
+              Add as many date and time options as you need. Create recurring sessions, weekend hangouts, or one-off family gatherings in
+              seconds.
+            </p>
+          </div>
+          <div class="card">
+            <div class="step-number">2</div>
+            <h3>Share an instant link</h3>
+            <p>
+              Send a smart link to your invitees via text, email, or group chat. They can open the voting grid without creating an account.
+            </p>
+          </div>
+          <div class="card">
+            <div class="step-number">3</div>
+            <h3>Collect everyone&apos;s votes</h3>
+            <p>
+              Participants tap the slots that work for them. EventSync tallies the votes in real time so you can see availability conflicts
+              at a glance.
+            </p>
+          </div>
+          <div class="card">
+            <div class="step-number">4</div>
+            <h3>Pick the best time</h3>
+            <p>
+              We highlight the options with the highest availability, making it easy to lock in the perfect schedule and notify everyone.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding-top: 0">
+      <div class="container workflow">
+        <div class="card create-event-card">
+          <div>
+            <h2>Plan your next get-together</h2>
+            <p style="color: rgba(32, 33, 36, 0.7); margin: 0">
+              Add multiple time options, then share your poll so the whole crew can vote.
+            </p>
+          </div>
+          <div>
+            <label for="eventTitle">Event name</label>
+            <input id="eventTitle" type="text" value="Family Brunch" />
+          </div>
+          <div>
+            <label>Time options</label>
+            <div id="optionList" class="option-list"></div>
+          </div>
+          <div class="slot-form">
+            <div>
+              <label for="dateInput">Date</label>
+              <input id="dateInput" type="date" />
+            </div>
+            <div class="time-inputs">
+              <div>
+                <label for="startTimeInput">Start</label>
+                <input id="startTimeInput" type="time" />
+              </div>
+              <div>
+                <label for="endTimeInput">End</label>
+                <input id="endTimeInput" type="time" />
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 12px; flex-wrap: wrap">
+            <button id="addSlot" class="btn btn-tertiary" type="button">Add option</button>
+            <button class="btn btn-secondary" type="button">Use smart suggestions</button>
+          </div>
+          <div class="share-link">
+            <div>
+              <span>Share invite link</span>
+              <div id="shareUrl" class="share-url"></div>
+            </div>
+            <button id="copyLink" class="btn btn-primary" type="button">Copy Link</button>
+          </div>
+        </div>
+
+        <div class="card voting-card">
+          <div>
+            <h2>Live availability poll</h2>
+            <p style="color: rgba(32, 33, 36, 0.7); margin: 0">
+              Tap a cell to mark yourself available or unavailable. EventSync tallies the best option instantly.
+            </p>
+          </div>
+          <div class="voting-grid">
+            <table>
+              <thead>
+                <tr id="gridHeader"></tr>
+              </thead>
+              <tbody id="gridBody"></tbody>
+            </table>
+          </div>
+          <div>
+            <h3 style="margin: 0 0 12px">Top matches</h3>
+            <div id="results" class="results-list"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <div class="cta-banner">
+          <div>
+            <h3>Ready to find the best time for everyone?</h3>
+            <p style="margin: 0">
+              Create a poll in seconds, share it with your guests, and lock in the perfect slot with confidence.
+            </p>
+          </div>
+          <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: flex-end">
+            <button class="btn btn-secondary">Explore Templates</button>
+            <button class="btn btn-primary">Create an Event</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      EventSync &mdash; coordinating time together made simple.
+    </footer>
+
+    <script>
+      const state = {
+        options: [
+          { id: crypto.randomUUID(), label: "Tue, May 21 · 10:00 AM - 11:30 AM" },
+          { id: crypto.randomUUID(), label: "Tue, May 21 · 7:00 PM - 8:30 PM" },
+          { id: crypto.randomUUID(), label: "Wed, May 22 · 11:00 AM - 12:00 PM" }
+        ],
+        participants: ["Alex", "Jordyn", "Mason", "Luca", "Priya"],
+        votes: {}
+      };
+
+      state.participants.forEach((participant, index) => {
+        state.votes[participant] = {};
+        state.options.forEach((option, optionIndex) => {
+          const prefill = optionIndex === 0 || (participant === "Alex" && optionIndex !== 1);
+          state.votes[participant][option.id] = prefill;
+        });
+      });
+
+      const optionList = document.getElementById("optionList");
+      const gridHeader = document.getElementById("gridHeader");
+      const gridBody = document.getElementById("gridBody");
+      const results = document.getElementById("results");
+      const eventTitleInput = document.getElementById("eventTitle");
+      const shareUrl = document.getElementById("shareUrl");
+      const addSlotButton = document.getElementById("addSlot");
+      const copyLinkButton = document.getElementById("copyLink");
+
+      function formatDateOption(dateValue, startValue, endValue) {
+        if (!dateValue || !startValue || !endValue) return null;
+        const date = new Date(dateValue + "T00:00:00");
+        const dateFormatter = new Intl.DateTimeFormat("en-US", {
+          weekday: "short",
+          month: "short",
+          day: "numeric"
+        });
+        const timeFormatter = new Intl.DateTimeFormat("en-US", {
+          hour: "numeric",
+          minute: "2-digit"
+        });
+        const startDate = new Date(`${dateValue}T${startValue}`);
+        const endDate = new Date(`${dateValue}T${endValue}`);
+        return `${dateFormatter.format(date)} · ${timeFormatter.format(startDate)} - ${timeFormatter.format(endDate)}`;
+      }
+
+      function renderOptions() {
+        optionList.innerHTML = "";
+        state.options.forEach((option) => {
+          const chip = document.createElement("div");
+          chip.className = "option-chip";
+          chip.innerHTML = `${option.label} <button type="button" aria-label="Remove option">×</button>`;
+          chip.querySelector("button").addEventListener("click", () => removeOption(option.id));
+          optionList.appendChild(chip);
+        });
+        renderGrid();
+        renderResults();
+        updateShareLink();
+      }
+
+      function renderGrid() {
+        gridHeader.innerHTML = "";
+        const nameHeader = document.createElement("th");
+        nameHeader.textContent = "Participants";
+        gridHeader.appendChild(nameHeader);
+
+        state.options.forEach((option) => {
+          const th = document.createElement("th");
+          th.textContent = option.label;
+          gridHeader.appendChild(th);
+        });
+
+        gridBody.innerHTML = "";
+        state.participants.forEach((participant) => {
+          const row = document.createElement("tr");
+          const nameCell = document.createElement("td");
+          nameCell.textContent = participant;
+          row.appendChild(nameCell);
+
+          state.options.forEach((option) => {
+            const cell = document.createElement("td");
+            const button = document.createElement("div");
+            button.className = "availability-cell";
+            button.dataset.participant = participant;
+            button.dataset.optionId = option.id;
+            button.textContent = state.votes[participant][option.id] ? "Yes" : "No";
+            button.classList.add(state.votes[participant][option.id] ? "available" : "unavailable");
+            button.addEventListener("click", toggleAvailability);
+            cell.appendChild(button);
+            row.appendChild(cell);
+          });
+          gridBody.appendChild(row);
+        });
+      }
+
+      function renderResults() {
+        results.innerHTML = "";
+        const totalParticipants = state.participants.length;
+        state.options.forEach((option) => {
+          let availableCount = 0;
+          state.participants.forEach((participant) => {
+            if (state.votes[participant][option.id]) availableCount += 1;
+          });
+          const item = document.createElement("div");
+          item.className = "result-item";
+
+          const header = document.createElement("div");
+          header.className = "result-header";
+          header.innerHTML = `<span>${option.label}</span><span>${availableCount}/${totalParticipants} available</span>`;
+
+          const bar = document.createElement("div");
+          bar.className = "result-bar";
+          const barFill = document.createElement("div");
+          barFill.className = "result-bar-fill";
+          barFill.style.width = `${(availableCount / totalParticipants) * 100}%`;
+          bar.appendChild(barFill);
+
+          item.appendChild(header);
+          item.appendChild(bar);
+          results.appendChild(item);
+        });
+      }
+
+      function toggleAvailability(event) {
+        const { participant, optionId } = event.currentTarget.dataset;
+        const current = state.votes[participant][optionId];
+        state.votes[participant][optionId] = !current;
+        renderGrid();
+        renderResults();
+      }
+
+      function removeOption(optionId) {
+        if (state.options.length === 1) return;
+        state.options = state.options.filter((option) => option.id !== optionId);
+        state.participants.forEach((participant) => {
+          delete state.votes[participant][optionId];
+        });
+        renderOptions();
+      }
+
+      addSlotButton.addEventListener("click", () => {
+        const dateValue = document.getElementById("dateInput").value;
+        const startValue = document.getElementById("startTimeInput").value;
+        const endValue = document.getElementById("endTimeInput").value;
+        const label = formatDateOption(dateValue, startValue, endValue);
+        if (!label) {
+          alert("Please choose a date, start time, and end time.");
+          return;
+        }
+        const option = { id: crypto.randomUUID(), label };
+        state.options.push(option);
+        state.participants.forEach((participant) => {
+          state.votes[participant][option.id] = false;
+        });
+        document.getElementById("dateInput").value = "";
+        document.getElementById("startTimeInput").value = "";
+        document.getElementById("endTimeInput").value = "";
+        renderOptions();
+      });
+
+      function updateShareLink() {
+        const slug = slugify(eventTitleInput.value || "event");
+        const optionCount = state.options.length;
+        shareUrl.textContent = `https://eventsync.app/p/${slug}?slots=${optionCount}`;
+      }
+
+      function slugify(value) {
+        return value
+          .toString()
+          .trim()
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)+/g, "");
+      }
+
+      eventTitleInput.addEventListener("input", updateShareLink);
+
+      copyLinkButton.addEventListener("click", async () => {
+        const text = shareUrl.textContent;
+        try {
+          await navigator.clipboard.writeText(text);
+          copyLinkButton.textContent = "Copied!";
+          setTimeout(() => (copyLinkButton.textContent = "Copy Link"), 1600);
+        } catch (error) {
+          copyLinkButton.textContent = "Press ⌘C / Ctrl+C";
+          setTimeout(() => (copyLinkButton.textContent = "Copy Link"), 1600);
+        }
+      });
+
+      renderOptions();
+    </script>
   </body>
 </html>
